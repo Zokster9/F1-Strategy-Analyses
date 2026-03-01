@@ -1,0 +1,14 @@
+{
+  "raw_rows": 161460,
+  "processed_rows": 127561,
+  "classification_results_file": "results/classification/classification_metrics.csv",
+  "clustering_results_file": "results/clustering/clustering_metrics.csv",
+  "classification_models": [
+    "RandomForest",
+    "XGBoost"
+  ],
+  "clustering_models": [
+    "KMeans",
+    "GMM"
+  ]
+}
