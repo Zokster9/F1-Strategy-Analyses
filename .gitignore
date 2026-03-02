@@ -210,3 +210,5 @@ __marimo__/
 
 # Project data artifacts
 data/
+/results/**/runs/
+/results/**/runs/**

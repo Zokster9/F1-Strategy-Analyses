@@ -78,26 +78,10 @@ def _is_green_like_status(status: object) -> bool:
     return not any(code in text for code in forbidden_codes)
 
 
-def _remove_iqr_outliers(
-    df: pd.DataFrame,
-    value_column: str,
-    group_columns: list[str],
-    iqr_multiplier: float = 1.5,
-) -> pd.DataFrame:
-    q1 = df.groupby(group_columns)[value_column].transform(lambda s: s.quantile(0.25))
-    q3 = df.groupby(group_columns)[value_column].transform(lambda s: s.quantile(0.75))
-    iqr = q3 - q1
-
-    lower = q1 - iqr_multiplier * iqr
-    upper = q3 + iqr_multiplier * iqr
-
-    mask = (df[value_column] >= lower) & (df[value_column] <= upper)
-    return df.loc[mask].copy()
-
-
 def preprocess_laps(raw_laps: pd.DataFrame) -> pd.DataFrame:
     """
-    Transformiše sirove FastF1 krugove u format spreman za modelovanje.
+    Transformiše sirove FastF1 krugove u bazni format spreman za modelovanje.
+    Napomena: train-fitted outlier filtering se radi u src/modeling.py.
     """
     if raw_laps.empty:
         raise ValueError("Sirov skup podataka je prazan; nije moguca obrada.")
@@ -166,10 +150,8 @@ def preprocess_laps(raw_laps: pd.DataFrame) -> pd.DataFrame:
     else:
         df["CanonicalTeam"] = np.nan
 
-    # Uklanjanje outlier krugova po vozacu i trci.
-    group_columns = [col for col in ["Year", "EventName", "Driver"] if col in df.columns]
-    if group_columns:
-        df = _remove_iqr_outliers(df, value_column="LapTime", group_columns=group_columns)
+    # Napomena: IQR outlier filtering se po potrebi radi kasnije na train splitu
+    # (fit pragova na train, primena na validation/test) da bi se izbegao leakage.
 
     # Standardizacija tipa gume za klasifikaciju.
     df["Compound"] = pd.Categorical(

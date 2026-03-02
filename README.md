@@ -41,3 +41,12 @@ Svaki run dobija:
 - run-specifične artefakte u:
   - `results/classification/runs/`
   - `results/clustering/runs/`
+
+## Preprocessing i split logika
+
+- Klasifikacija i klasterovanje se dele na `train/validation/test` (60/20/20, stratifikovano po ciljnoj etiketi).
+- Preprocessing se fituje samo na `train`:
+  - train-fitted IQR outlier filter (`LapTime`, grupisanje po `Year/EventName/Driver`) i primena istih pragova na validation/test;
+  - klasifikacija: bez normalizacije numeričkih obeležja (tree modeli rade na originalnoj skali);
+  - klasterovanje: event+compound z-score statistike fit na train, zatim `StandardScaler` (i optional Driver one-hot) fit na train.
+- Evaluacija se računa na `validation` i `test`; metrika fajlovi imaju kolonu `split`.

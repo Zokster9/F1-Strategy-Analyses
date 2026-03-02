@@ -1,8 +1,12 @@
 {
-  "raw_rows": 161460,
-  "processed_rows": 127561,
-  "classification_results_file": "results/classification/classification_metrics.csv",
-  "clustering_results_file": "results/clustering/clustering_metrics.csv",
+  "run_id": "20260302T204523345799Z",
+  "run_timestamp": "2026-03-02T20:45:23Z",
+  "raw_rows": 167083,
+  "processed_rows": 135672,
+  "classification_results_file": "/Users/zoranbukorac/Desktop/PythonProjects/F1-Strategy-Analyses/results/classification/classification_metrics.csv",
+  "classification_history_file": "/Users/zoranbukorac/Desktop/PythonProjects/F1-Strategy-Analyses/results/classification/classification_metrics_history.csv",
+  "clustering_results_file": "/Users/zoranbukorac/Desktop/PythonProjects/F1-Strategy-Analyses/results/clustering/clustering_metrics.csv",
+  "clustering_history_file": "/Users/zoranbukorac/Desktop/PythonProjects/F1-Strategy-Analyses/results/clustering/clustering_metrics_history.csv",
   "classification_models": [
     "RandomForest",
     "XGBoost"
@@ -10,5 +14,11 @@
   "clustering_models": [
     "KMeans",
     "GMM"
-  ]
+  ],
+  "collection_config": {
+    "max_schedule_retries": 3,
+    "max_session_retries": 3,
+    "max_collection_passes": 3,
+    "retry_sleep_seconds": 1.5
+  }
 }

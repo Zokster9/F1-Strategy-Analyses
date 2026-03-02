@@ -1,9 +1,35 @@
 {
-  "run_id": "20260301T120808647651Z",
-  "run_timestamp": "2026-03-01T12:08:08Z",
-  "train_size": 79481,
-  "validation_size": 26494,
-  "test_size": 26494,
+  "run_id": "20260302T204523345799Z",
+  "run_timestamp": "2026-03-02T20:45:23Z",
+  "train_size_before_outlier_filter": 81402,
+  "validation_size_before_outlier_filter": 27135,
+  "test_size_before_outlier_filter": 27135,
+  "train_size": 79153,
+  "validation_size": 26119,
+  "test_size": 26120,
+  "preprocessing": {
+    "fit_on": "train_only",
+    "iqr_outlier_filter": {
+      "value_column": "LapTime",
+      "group_columns": [
+        "Year",
+        "EventName",
+        "Driver"
+      ],
+      "iqr_multiplier": 1.5,
+      "rows_removed": {
+        "train": 2249,
+        "validation": 1016,
+        "test": 1015
+      }
+    },
+    "numeric_scaler": null,
+    "applied_to": [
+      "train",
+      "validation",
+      "test"
+    ]
+  },
   "xgboost_available": true,
   "xgboost_import_error": null,
   "model_configs": {

@@ -1,0 +1,41 @@
+{
+  "run_id": "20260302T204523345799Z",
+  "run_timestamp": "2026-03-02T20:45:23Z",
+  "train_size_before_outlier_filter": 81402,
+  "validation_size_before_outlier_filter": 27135,
+  "test_size_before_outlier_filter": 27135,
+  "train_size": 79240,
+  "validation_size": 26158,
+  "test_size": 26130,
+  "preprocessing": {
+    "fit_on": "train_only",
+    "iqr_outlier_filter": {
+      "value_column": "LapTime",
+      "group_columns": [
+        "Year",
+        "EventName",
+        "Driver"
+      ],
+      "iqr_multiplier": 1.5,
+      "rows_removed": {
+        "train": 2162,
+        "validation": 977,
+        "test": 1005
+      }
+    },
+    "event_compound_zscore": true,
+    "numeric_scaler": "StandardScaler",
+    "driver_one_hot": true,
+    "applied_to": [
+      "train",
+      "validation",
+      "test"
+    ]
+  },
+  "model_selection": {
+    "kmeans_strategy_selected_on": "validation_adjusted_rand_plus_purity",
+    "gmm_covariance_selected_on": "validation_adjusted_rand_plus_purity"
+  },
+  "n_clusters": 10,
+  "label_basis": "CanonicalTeam"
+}
