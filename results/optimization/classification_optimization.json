@@ -1,0 +1,57 @@
+{
+  "RandomForest": {
+    "best_params": {
+      "n_estimators": 800,
+      "max_depth": 50,
+      "min_samples_split": 2,
+      "min_samples_leaf": 1,
+      "max_features": 0.75,
+      "class_weight": "balanced_subsample",
+      "criterion": "entropy"
+    },
+    "best_cv_macro_f1": 0.7899905966116789,
+    "test_macro_f1": 0.7973560855768418,
+    "test_weighted_f1": 0.8111908052421359,
+    "n_trials": 50,
+    "use_smote": true,
+    "feature_columns": [
+      "LapNumber",
+      "TyreLife",
+      "LapTime",
+      "Sector1Time",
+      "Sector2Time",
+      "Sector3Time",
+      "MaxSpeed",
+      "AvgSpeed"
+    ]
+  },
+  "XGBoost": {
+    "best_params": {
+      "n_estimators": 1000,
+      "max_depth": 12,
+      "learning_rate": 0.1,
+      "subsample": 0.9,
+      "colsample_bytree": 1.0,
+      "min_child_weight": 5,
+      "gamma": 0,
+      "reg_alpha": 0.01,
+      "reg_lambda": 0.5
+    },
+    "best_cv_macro_f1": 0.7922378352246648,
+    "test_macro_f1": 0.8004423100753084,
+    "test_weighted_f1": 0.813462676072705,
+    "n_trials": 50,
+    "use_smote": true,
+    "use_sample_weights": true,
+    "feature_columns": [
+      "LapNumber",
+      "TyreLife",
+      "LapTime",
+      "Sector1Time",
+      "Sector2Time",
+      "Sector3Time",
+      "MaxSpeed",
+      "AvgSpeed"
+    ]
+  }
+}

@@ -145,6 +145,19 @@ def preprocess_laps(raw_laps: pd.DataFrame) -> pd.DataFrame:
     ]
     df = df.dropna(subset=model_columns)
 
+    # Izvedena obelezja za optimizaciju modela.
+    df["SectorRatio_S1"] = df["Sector1Time"] / df["LapTime"]
+    df["SectorRatio_S2"] = df["Sector2Time"] / df["LapTime"]
+    df["SectorRatio_S3"] = df["Sector3Time"] / df["LapTime"]
+    df["SpeedDelta"] = df["MaxSpeed"] - df["AvgSpeed"]
+    df["TyreLifeSquared"] = df["TyreLife"] ** 2
+
+    if "RoundNumber" in df.columns:
+        max_laps = df.groupby(["Year", "RoundNumber"])["LapNumber"].transform("max")
+        df["LapFraction"] = df["LapNumber"] / max_laps
+    else:
+        df["LapFraction"] = np.nan
+
     if "Team" in df.columns:
         df["CanonicalTeam"] = df["Team"].apply(_canonical_team_label)
     else:
@@ -176,6 +189,12 @@ def preprocess_laps(raw_laps: pd.DataFrame) -> pd.DataFrame:
         "Sector3Time",
         "MaxSpeed",
         "AvgSpeed",
+        "SectorRatio_S1",
+        "SectorRatio_S2",
+        "SectorRatio_S3",
+        "SpeedDelta",
+        "TyreLifeSquared",
+        "LapFraction",
     ]
     final_columns = [col for col in ordered_columns if col in df.columns]
     df = df[final_columns].copy()

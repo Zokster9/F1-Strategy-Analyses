@@ -17,6 +17,7 @@ from sklearn.metrics import (
 )
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 
 XGBOOST_IMPORT_ERROR: str | None = None
@@ -39,6 +40,32 @@ FEATURE_COLUMNS = [
     "MaxSpeed",
     "AvgSpeed",
 ]
+
+EXTENDED_FEATURE_COLUMNS = FEATURE_COLUMNS + [
+    "SectorRatio_S1",
+    "SectorRatio_S2",
+    "SectorRatio_S3",
+    "SpeedDelta",
+    "TyreLifeSquared",
+    "LapFraction",
+]
+
+
+def _available_feature_columns(data: pd.DataFrame) -> list[str]:
+    """Vraca prosirena obelezja ako su dostupna, inace bazna."""
+    extended = [col for col in EXTENDED_FEATURE_COLUMNS if col in data.columns]
+    if len(extended) > len(FEATURE_COLUMNS):
+        return extended
+    return [col for col in FEATURE_COLUMNS if col in data.columns]
+
+
+def _compute_sample_weights(y: np.ndarray) -> np.ndarray:
+    """Racuna balansirane tezine uzoraka: total / (n_classes * class_count)."""
+    classes, counts = np.unique(y, return_counts=True)
+    n_classes = len(classes)
+    total = len(y)
+    weight_map = {cls: total / (n_classes * cnt) for cls, cnt in zip(classes, counts)}
+    return np.array([weight_map[label] for label in y], dtype=float)
 
 
 def _safe_model_name(model_name: str) -> str:
@@ -379,7 +406,8 @@ def evaluate_classification_models(
     if data.empty:
         raise ValueError("Ulazni skup za klasifikaciju je prazan.")
 
-    subset = data.dropna(subset=FEATURE_COLUMNS + ["Compound"]).copy()
+    feature_cols = _available_feature_columns(data)
+    subset = data.dropna(subset=feature_cols + ["Compound"]).copy()
     if subset.empty:
         raise ValueError("Nema dovoljno podataka za klasifikaciju nakon ciscenja.")
 
@@ -405,9 +433,12 @@ def evaluate_classification_models(
 
     models: dict[str, object] = {
         "RandomForest": RandomForestClassifier(
-            n_estimators=400,
-            max_depth=None,
-            min_samples_split=4,
+            n_estimators=800,
+            max_depth=50,
+            min_samples_split=2,
+            min_samples_leaf=1,
+            max_features=0.75,
+            criterion="entropy",
             random_state=random_state,
             n_jobs=-1,
             class_weight="balanced_subsample",
@@ -418,11 +449,15 @@ def evaluate_classification_models(
         models["XGBoost"] = XGBClassifier(
             objective="multi:softprob",
             eval_metric="mlogloss",
-            n_estimators=400,
-            max_depth=8,
-            learning_rate=0.05,
+            n_estimators=1000,
+            max_depth=12,
+            learning_rate=0.1,
             subsample=0.9,
-            colsample_bytree=0.9,
+            colsample_bytree=1.0,
+            min_child_weight=5,
+            gamma=0,
+            reg_alpha=0.01,
+            reg_lambda=0.5,
             random_state=random_state,
             n_jobs=-1,
         )
@@ -441,9 +476,9 @@ def evaluate_classification_models(
         LOGGER.info("Trening modela: %s", model_name)
         model_params = _model_params_json(model)
 
-        x_train = train_df[FEATURE_COLUMNS]
-        x_val = val_df[FEATURE_COLUMNS]
-        x_test = test_df[FEATURE_COLUMNS]
+        x_train = train_df[feature_cols]
+        x_val = val_df[feature_cols]
+        x_test = test_df[feature_cols]
         y_train = train_df["Compound"].astype(str)
         y_val = val_df["Compound"].astype(str)
         y_test = test_df["Compound"].astype(str)
@@ -451,8 +486,13 @@ def evaluate_classification_models(
         if model_name == "XGBoost":
             encoder = LabelEncoder()
             y_train_enc = encoder.fit_transform(y_train)
+            y_val_enc = encoder.transform(y_val)
+            sample_weights = _compute_sample_weights(y_train_enc)
 
-            model.fit(x_train, y_train_enc)
+            model.fit(
+                x_train, y_train_enc,
+                sample_weight=sample_weights,
+            )
             y_val_pred = encoder.inverse_transform(model.predict(x_val).astype(int))
             y_test_pred = encoder.inverse_transform(model.predict(x_test).astype(int))
         else:
@@ -522,6 +562,7 @@ def evaluate_classification_models(
             "numeric_scaler": None,
             "applied_to": ["train", "validation", "test"],
         },
+        "feature_columns": feature_cols,
         "xgboost_available": bool(XGBClassifier is not None),
         "xgboost_import_error": XGBOOST_IMPORT_ERROR,
         "model_configs": {
